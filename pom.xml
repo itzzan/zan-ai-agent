@@ -56,6 +56,20 @@
             <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
             <version>4.4.0</version>
         </dependency>
+        <!-- Reactor Core (Flux) -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>3.5.0</version> <!-- 或使用 Spring Boot 管理的版本 -->
+        </dependency>
+
+        <!-- Reactor Test (StepVerifier) -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <version>3.5.0</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>

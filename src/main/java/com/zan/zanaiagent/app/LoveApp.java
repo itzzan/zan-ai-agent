@@ -2,6 +2,7 @@ package com.zan.zanaiagent.app;
 
 import com.zan.zanaiagent.advisor.MyCustomAdvisor;
 import com.zan.zanaiagent.advisor.MyLoggerAdvisor;
+import com.zan.zanaiagent.advisor.ReReadingAdvisor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -10,6 +11,7 @@ import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
@@ -38,8 +40,7 @@ public class LoveApp {
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
                         new MessageChatMemoryAdvisor(chatMemory),
-                        new MyCustomAdvisor(),
-                        new MyLoggerAdvisor()
+                        new ReReadingAdvisor()
                 )
                 .build();
     }
@@ -56,6 +57,23 @@ public class LoveApp {
         String content = response.getResult().getOutput().getText();
         log.info("content: {}", content);
         return content;
+    }
+
+    public Flux<String> doChatStream(String message, String chatId) {
+        return chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec
+                        .param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10)
+                )
+                .stream()
+                .chatResponse()
+                .map(chatResponse -> {
+                    String content = chatResponse.getResult().getOutput().getText();
+                    log.info("Received chunk: {}", content);  // 可选：记录每个数据块
+                    return content;
+                });
     }
 
 }

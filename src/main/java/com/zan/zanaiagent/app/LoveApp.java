@@ -3,6 +3,7 @@ package com.zan.zanaiagent.app;
 import com.zan.zanaiagent.advisor.MyCustomAdvisor;
 import com.zan.zanaiagent.advisor.MyLoggerAdvisor;
 import com.zan.zanaiagent.advisor.ReReadingAdvisor;
+import com.zan.zanaiagent.chatmemory.FileBasedChatMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -35,17 +36,30 @@ public class LoveApp {
             "恋爱状态询问沟通、习惯差异引发的矛盾；已婚状态询问家庭责任与亲属关系处理的问题。" +
             "引导用户详述事情经过、对方反应及自身想法，以便给出专属解决方案。";
 
+//    public LoveApp(ChatModel dashscopeChatModel) {
+//        // 初始化基于内存的对话记忆
+//        ChatMemory chatMemory = new InMemoryChatMemory();
+//        chatClient = ChatClient.builder(dashscopeChatModel)
+//                .defaultSystem(SYSTEM_PROMPT)
+//                .defaultAdvisors(
+//                        new MessageChatMemoryAdvisor(chatMemory),
+//                        new MyLoggerAdvisor()
+//                )
+//                .build();
+//    }
+
     public LoveApp(ChatModel dashscopeChatModel) {
-        // 初始化基于内存的对话记忆
-        ChatMemory chatMemory = new InMemoryChatMemory();
+        // 初始化基于文件的对话记忆
+        String fileDir = System.getProperty("user.dir") + "/chat-memory";
+        ChatMemory chatMemory = new FileBasedChatMemory(fileDir);
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
-                        new MessageChatMemoryAdvisor(chatMemory),
-                        new MyLoggerAdvisor()
+                        new MessageChatMemoryAdvisor(chatMemory)
                 )
                 .build();
     }
+
 
     public String doChat(String message, String chatId) {
         ChatResponse response = chatClient
